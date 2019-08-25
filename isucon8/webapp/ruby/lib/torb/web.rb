@@ -85,14 +85,7 @@ module Torb
         end
 
         # sheets = db.query('SELECT * FROM sheets ORDER BY `rank`, num')
-        sheets = db.xquery('SELECT *
-          FROM sheets
-          LEFT JOIN reservations ON reservations.sheet_id = sheets.id
-          WHERE event_id = ?
-            AND canceled_at IS NULL
-          GROUP BY event_id, sheet_id
-          HAVING reserved_at = MIN(reserved_at)
-          ORDER BY `rank`, num', event_id)
+        sheets = db.xquery('select * From sheets s left join (select * from reservations where canceled_at is null and event_id = ?) as r on s.id = r.sheet_id', event_id)
         sheets.each do |sheet|
           event['sheets'][sheet['rank']]['price'] ||= event['price'] + sheet['price']
           event['total'] += 1
